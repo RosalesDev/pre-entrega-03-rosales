@@ -221,11 +221,12 @@ const professionaPlanningList = [
   planning_4,
 ];
 
+const mainTitle = document.querySelector("main h3");
 const mainGrid = document.querySelector(".container .row");
 
 function renderMainGrid() {
   mainGrid.innerHTML = "";
-
+  mainTitle.innerHTML = "Selecciona el prefesional para solicitar un turno.";
   for (let professional of professionalList) {
     let cardDiv = document.createElement("div");
     cardDiv.className = "col";
@@ -259,7 +260,10 @@ function renderMainGrid() {
 renderMainGrid();
 
 function goToForm(professional) {
-  const professionalPlanning = professionaPlanningList.find((planning) => planning.professional === professional);
+  mainTitle.innerHTML = "Igrese sus datos";
+  const professionalPlanning = professionaPlanningList.find(
+    (planning) => planning.professional === professional
+  );
   console.log(professionalPlanning.available_times_list);
   mainGrid.innerHTML = `<div class="container">
   <div class="text-center p-4">
