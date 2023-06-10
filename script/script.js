@@ -3,14 +3,7 @@
 /* -------------------------------------------------------------------------- */
 
 class Person {
-  constructor(
-    doc_number,
-    gender,
-    last_name,
-    first_name,
-    birthday,
-    photo,
-  ) {
+  constructor(doc_number, gender, last_name, first_name, birthday, photo) {
     this.id = Date.now();
     this.doc_number = doc_number;
     this.gender = gender;
@@ -129,7 +122,7 @@ const professional_person_1 = new Person(
 );
 
 const professional_person_2 = new Person(
-  "36051238",
+  "34050138",
   "M",
   "Blackwell",
   "Elizabeth ",
@@ -138,7 +131,7 @@ const professional_person_2 = new Person(
 );
 
 const professional_person_3 = new Person(
-  "36051238",
+  "32558425",
   "M",
   "Sanger",
   "Margaret",
@@ -146,7 +139,7 @@ const professional_person_3 = new Person(
   "./images/img-dr-woman-02.png"
 );
 const professional_person_4 = new Person(
-  "36051238",
+  "33448551",
   "M",
   "Curie",
   "Marie ",
@@ -154,37 +147,144 @@ const professional_person_4 = new Person(
   "./images/img-dr-woman-03.png"
 );
 
-const professional_1 = new Professional(1, "A-123", professional_person_1, "Medicina General");
+const professional_1 = new Professional(
+  1,
+  "A-123",
+  professional_person_1,
+  "Medicina General"
+);
 
-const professional_2 = new Professional(2, "B-345", professional_person_2, "Cardiología");
+const professional_2 = new Professional(
+  2,
+  "B-345",
+  professional_person_2,
+  "Cardiología"
+);
 
-const professional_3 = new Professional(3, "B-346", professional_person_3, "Pediatría");
+const professional_3 = new Professional(
+  3,
+  "B-346",
+  professional_person_3,
+  "Pediatría"
+);
 
-const professional_4 = new Professional(4, "C-347", professional_person_4, "Nutrición");
+const professional_4 = new Professional(
+  4,
+  "C-347",
+  professional_person_4,
+  "Nutrición"
+);
 
-const professionalList = [professional_1, professional_2,professional_3,professional_4];
+let planning_1 = new ProfessionalPlanning(
+  1,
+  professional_1,
+  new Date(2023, 07, 22, 8, 0, 0),
+  new Date(2023, 07, 22, 12, 0, 0),
+  30
+);
 
+let planning_2 = new ProfessionalPlanning(
+  2,
+  professional_2,
+  new Date(2023, 07, 22, 15, 0, 0),
+  new Date(2023, 07, 22, 19, 0, 0),
+  60
+);
+
+let planning_3 = new ProfessionalPlanning(
+  3,
+  professional_3,
+  new Date(2023, 07, 22, 8, 0, 0),
+  new Date(2023, 07, 22, 14, 0, 0),
+  30
+);
+
+let planning_4 = new ProfessionalPlanning(
+  4,
+  professional_4,
+  new Date(2023, 07, 22, 19, 0, 0),
+  new Date(2023, 07, 22, 22, 0, 0),
+  60
+);
+
+const professionalList = [
+  professional_1,
+  professional_2,
+  professional_3,
+  professional_4,
+];
+
+const professionaPlanningList = [
+  planning_1,
+  planning_2,
+  planning_3,
+  planning_4,
+];
 
 const mainGrid = document.querySelector(".container .row");
 
-for (let professional of professionalList) {
+function renderMainGrid() {
+  mainGrid.innerHTML = "";
 
-  let cardDiv = document.createElement("div")
-  cardDiv.className = "col";
+  for (let professional of professionalList) {
+    let cardDiv = document.createElement("div");
+    cardDiv.className = "col";
 
-  cardDiv.innerHTML = `
-      <a href="#">
-        <div class="col">
-          <div class="card" style="width: 18rem;">
-            <img class="p-2" src="${professional.person.photo}" class="card-img-top" alt="Professional picture">
-            <div class="card-body">
-              <h5 class="card-title">${professional.person.last_name} ${professional.person.first_name}</h5>
-              <p class="card-text">${professional.specialty}</p>
+    cardDiv.innerHTML = `
+        <a href="#" data-dni=${professional.person.doc_number}>
+          <div class="col">
+            <div class="card" style="width: 18rem;">
+              <img class="p-2" src="${professional.person.photo}" class="card-img-top" alt="Professional picture">
+              <div class="card-body">
+                <h5 class="card-title">${professional.person.last_name} ${professional.person.first_name}</h5>
+                <p class="card-text">${professional.specialty}</p>
+              </div>
             </div>
           </div>
-        </div>
-      </a>`;
-  
-  mainGrid.append(cardDiv);
+        </a>`;
+
+    mainGrid.append(cardDiv);
+  }
+  const cards = document.querySelectorAll(".row a");
+  for (let card of cards) {
+    card.addEventListener("click", () => {
+      const selectedProfessional = professionalList.find(
+        (professional) => professional.person.doc_number == card.dataset.dni
+      );
+      goToForm(selectedProfessional);
+    });
+  }
 }
 
+renderMainGrid();
+
+function goToForm(professional) {
+  const professionalPlanning = professionaPlanningList.find((planning) => planning.professional === professional);
+  console.log(professionalPlanning.available_times_list);
+  mainGrid.innerHTML = `<div class="container">
+  <div class="text-center p-4">
+    <p>Turno con: ${professional.person.last_name} ${professional.person.first_name}</p>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-5">
+      <form action="#">
+        <div class="mb-3">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingInput" placeholder="Ingrese su DNI">
+            <label for="floatingInput">DNI</label>
+          </div>
+          <div class="form-floating">
+            <input type="text" class="form-control" id="floatingPassword" placeholder="Ingrese su apellido">
+            <label for="floatingPassword">Apellido</label>
+          </div>
+      </form>
+    </div>
+    <button class="btn btn-success" type="button">VOLVER</button>
+  </div>
+</div>`;
+  const backButton = document.querySelector(".btn");
+
+  backButton.addEventListener("click", () => {
+    renderMainGrid();
+  });
+}
