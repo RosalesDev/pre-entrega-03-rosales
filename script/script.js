@@ -85,8 +85,8 @@ class ProfessionalPlanning {
     return datesArr;
   }
 
-  deleteUsedTime(id) {
-    this.available_times_list.splice(id, 1);
+  deleteUsedTime(selectedTime) {
+    this.available_times_list = this.available_times_list.filter((time) => time != selectedTime);
   }
 }
 
@@ -112,6 +112,13 @@ class Appointment {
 /* -------------------------------------------------------------------------- */
 /*                                 FIN CLASES                                 */
 /* -------------------------------------------------------------------------- */
+
+function createNewAppointment(person, time, professional_planning) {
+  let appointment = new Appointment(person, time, professional_planning);
+  professional_planning.deleteUsedTime(time);
+  return appointment;
+}
+
 const professional_person_1 = new Person(
   "35887554",
   "M",
@@ -178,32 +185,32 @@ const professional_4 = new Professional(
 let planning_1 = new ProfessionalPlanning(
   1,
   professional_1,
-  new Date(2023, 07, 22, 8, 0, 0),
-  new Date(2023, 07, 22, 12, 0, 0),
+  new Date(2023, 7, 22, 8, 0, 0),
+  new Date(2023, 7, 22, 12, 0, 0),
   30
 );
 
 let planning_2 = new ProfessionalPlanning(
   2,
   professional_2,
-  new Date(2023, 07, 22, 15, 0, 0),
-  new Date(2023, 07, 22, 19, 0, 0),
+  new Date(2023, 7, 22, 15, 0, 0),
+  new Date(2023, 7, 22, 19, 0, 0),
   60
 );
 
 let planning_3 = new ProfessionalPlanning(
   3,
   professional_3,
-  new Date(2023, 07, 22, 8, 0, 0),
-  new Date(2023, 07, 22, 14, 0, 0),
+  new Date(2023, 7, 22, 8, 0, 0),
+  new Date(2023, 7, 22, 14, 0, 0),
   30
 );
 
 let planning_4 = new ProfessionalPlanning(
   4,
   professional_4,
-  new Date(2023, 07, 22, 19, 0, 0),
-  new Date(2023, 07, 22, 22, 0, 0),
+  new Date(2023, 7, 22, 19, 0, 0),
+  new Date(2023, 7, 22, 22, 0, 0),
   60
 );
 
@@ -221,12 +228,16 @@ const professionaPlanningList = [
   planning_4,
 ];
 
+let patientList = [];
+let appointmentLis = [];
+
 const mainTitle = document.querySelector("main h3");
 const mainGrid = document.querySelector(".container .row");
 
 function renderMainGrid() {
   mainGrid.innerHTML = "";
   mainTitle.innerHTML = "Selecciona el prefesional para solicitar un turno.";
+
   for (let professional of professionalList) {
     let cardDiv = document.createElement("div");
     cardDiv.className = "col";
@@ -260,35 +271,175 @@ function renderMainGrid() {
 renderMainGrid();
 
 function goToForm(professional) {
-  mainTitle.innerHTML = "Igrese sus datos";
+  function fillDay() {
+    let options = "";
+
+    for (let i = 1; i <= 31; i++) {
+      options += `<option value=${i}>${i}</option>`;
+    }
+    return options;
+  }
+  function fillMonth() {
+    let options = "";
+
+    for (let i = 1; i <= 12; i++) {
+      options += `<option value=${i}>${i}</option>`;
+    }
+    return options;
+  }
+  function fillYear() {
+    let options = "";
+    const current_date = new Date();
+
+    for (let i = 1920; i <= current_date.getFullYear(); i++) {
+      options += `<option value=${i}>${i}</option>`;
+    }
+    return options;
+  }
+
+  function renderTimes(availableTimes) {
+    let options = "";
+
+    for (let time of availableTimes) {
+      options += `<option value=${time}>${time}</option>`;
+    }
+
+    return options;
+  }
+
+  mainTitle.innerHTML = "Ingrese sus datos";
   const professionalPlanning = professionaPlanningList.find(
     (planning) => planning.professional === professional
   );
-  console.log(professionalPlanning.available_times_list);
-  mainGrid.innerHTML = `<div class="container">
+
+  mainGrid.innerHTML = `
+  <div class="container">
   <div class="text-center p-4">
-    <p>Turno con: ${professional.person.last_name} ${professional.person.first_name}</p>
+    <p>Turno con: ${professional.person.last_name} ${
+    professional.person.first_name
+  }</p>
   </div>
   <div class="row justify-content-center">
-    <div class="col-5">
-      <form action="#">
+    <div class="form-container col-5 p-4">
+      <form class="needs-validation" novalidate>
         <div class="mb-3">
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingInput" placeholder="Ingrese su DNI">
-            <label for="floatingInput">DNI</label>
+            <select id="timeSelect" class="form-select" aria-label="Gender select">
+              <option selected>Horas disponibles</option>
+              ${renderTimes(professionalPlanning.available_times_list)}
+            </select>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="dniInput" placeholder="Ingrese su DNI" required>
+            <label for="dniInput">DNI</label>
+            <div class="invalid-feedback">
+              Please choose a username.
+            </div>
+          </div>
+          <div class="form-floating d-flex justify-content-between ps-3 pe-5">
+            <p class="d-inline">Género</p>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="genderRadio" id="genderRadioM" value="M" checked>
+              <label class="form-check-label" for="genderRadioM">M</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="genderRadio" id="genderRadioF" value="F">
+              <label class="form-check-label" for="genderRadioF">F</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="genderRadio" id="genderRadioX" value="X">
+              <label class="form-check-label" for="genderRadioX">X</label>
+            </div>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="lastNameInput" placeholder="Ingrese su apellido">
+            <label for="lastNameInput">Apellido</label>
           </div>
           <div class="form-floating">
-            <input type="text" class="form-control" id="floatingPassword" placeholder="Ingrese su apellido">
-            <label for="floatingPassword">Apellido</label>
+            <input type="text" class="form-control" id="firstNameInput" placeholder="Ingrese su nombre">
+            <label for="firstNameInput">Nombre</label>
           </div>
+          <div class="form-floating mt-3 ps-3"><p>Fecha de nacimiento</p></div>
+          <div class="row mb-5">
+            <div class="col-4">
+              <label for="inputDay" class="form-label">Día</label>
+              <select id="inputDay" class="form-select" aria-label="Day select">
+                ${fillDay()}
+              </select>
+            </div>
+            <div class="col-4">
+              <label for="inputMonth" class="form-label">Mes</label>
+                <select id="inputMonth" class="form-select" aria-label="Month select">
+                  ${fillMonth()}
+                </select>
+            </div>
+            <div class="col-4">
+              <label for="inputYear" class="form-label">Año</label>
+                <select id="inputYear" class="form-select" aria-label="Year select">
+                  ${fillYear()}
+                </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 d-flex  justify-content-between">
+          <button class="btn btn-success w-50" type="button">VOLVER</button>
+          <div class="container w-25"></div>
+          <button class="btn btn-primary w-50" type="submit">SOLICITAR TURNO</button>
+        </div>
       </form>
     </div>
-    <button class="btn btn-success" type="button">VOLVER</button>
   </div>
 </div>`;
-  const backButton = document.querySelector(".btn");
+  const backButton = document.querySelector(".btn-success");
+  const submitButton = document.querySelector(".btn-primary");
 
   backButton.addEventListener("click", () => {
     renderMainGrid();
+  });
+
+  submitButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    const selectedTime = document.getElementById("timeSelect").value;
+    const docNumber = document.getElementById("dniInput").value;
+    const gender = document.querySelector(
+      'input[name="genderRadio"]:checked'
+    ).value;
+    const lastName = document.getElementById("lastNameInput").value;
+    const firstName = document.getElementById("firstNameInput").value;
+    const birthDay = document.getElementById("inputDay").value;
+    const birthMonth = document.getElementById("inputMonth").value;
+    const birthYear = document.getElementById("inputYear").value;
+
+    if (selectedTime == "Horas disponibles") {
+      alert("Debe seleccionar una hora para el turno.");
+      return 0;
+    }
+    if (docNumber != undefined && (isNaN(docNumber) || docNumber.length < 8)) {
+      alert("El DNI ingresado no es válido.");
+      return 0;
+    }
+    if(lastName != undefined && lastName.length < 3) {
+      alert('El apellido ingresado no es válido.');
+      return 0;
+    }
+    if(firstName != undefined && firstName.length < 3) {
+      alert('El nombre ingresado no es válido.');
+      return 0;
+    }
+
+    const newPerson = new Person(
+      docNumber,
+      gender,
+      lastName,
+      firstName,
+      birthDay + "/" + birthMonth + "/" + birthYear,
+      './images/person-silhouette.png'
+    );
+
+    patientList.push(newPerson);
+
+    const newAppointment = createNewAppointment(newPerson,selectedTime,professionalPlanning);
+
+    console.log(newAppointment);
   });
 }
