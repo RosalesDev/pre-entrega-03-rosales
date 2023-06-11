@@ -86,7 +86,9 @@ class ProfessionalPlanning {
   }
 
   deleteUsedTime(selectedTime) {
-    this.available_times_list = this.available_times_list.filter((time) => time != selectedTime);
+    this.available_times_list = this.available_times_list.filter(
+      (time) => time != selectedTime
+    );
   }
 }
 
@@ -194,7 +196,7 @@ let planning_2 = new ProfessionalPlanning(
   2,
   professional_2,
   new Date(2023, 7, 22, 15, 0, 0),
-  new Date(2023, 7, 22, 19, 0, 0),
+  new Date(2023, 7, 22, 16, 0, 0),
   60
 );
 
@@ -228,8 +230,15 @@ const professionaPlanningList = [
   planning_4,
 ];
 
+if (!localStorage.getItem("professional_planning_list")) {
+  localStorage.setItem(
+    "professional_planning_list",
+    JSON.stringify(professionaPlanningList)
+  );
+}
+
 let patientList = [];
-let appointmentLis = [];
+let appointmentList = [];
 
 const mainTitle = document.querySelector("main h3");
 const mainGrid = document.querySelector(".container .row");
@@ -271,6 +280,25 @@ function renderMainGrid() {
 renderMainGrid();
 
 function goToForm(professional) {
+  const professionalPlanningListFromLS = JSON.parse(
+    localStorage.getItem("professional_planning_list")
+  );
+  const professionalPlanningFromLS = professionalPlanningListFromLS.find(
+    (professionalPlanning) =>
+      professionalPlanning.professional.id == professional.id);
+  console.log(professionalPlanningFromLS);
+
+  const professionalPlanning = professionaPlanningList.find(
+    (planning) => planning.professional === professional
+  );
+
+  if (professionalPlanningFromLS.available_times_list.length == 0) {
+    alert("El profesional no tiene horarios disponibles.");
+    return 0;
+  }
+  if (localStorage.getItem("appointment_list")) {
+    appointmentList = JSON.parse(localStorage.getItem("appointment_list"));
+  }
   function fillDay() {
     let options = "";
 
@@ -308,9 +336,6 @@ function goToForm(professional) {
   }
 
   mainTitle.innerHTML = "Ingrese sus datos";
-  const professionalPlanning = professionaPlanningList.find(
-    (planning) => planning.professional === professional
-  );
 
   mainGrid.innerHTML = `
   <div class="container">
@@ -326,7 +351,7 @@ function goToForm(professional) {
           <div class="form-floating mb-3">
             <select id="timeSelect" class="form-select" aria-label="Gender select">
               <option selected>Horas disponibles</option>
-              ${renderTimes(professionalPlanning.available_times_list)}
+              ${renderTimes(professionalPlanningFromLS.available_times_list)}
             </select>
           </div>
           <div class="form-floating mb-3">
@@ -418,12 +443,12 @@ function goToForm(professional) {
       alert("El DNI ingresado no es válido.");
       return 0;
     }
-    if(lastName != undefined && lastName.length < 3) {
-      alert('El apellido ingresado no es válido.');
+    if (lastName != undefined && lastName.length < 3) {
+      alert("El apellido ingresado no es válido.");
       return 0;
     }
-    if(firstName != undefined && firstName.length < 3) {
-      alert('El nombre ingresado no es válido.');
+    if (firstName != undefined && firstName.length < 3) {
+      alert("El nombre ingresado no es válido.");
       return 0;
     }
 
@@ -433,12 +458,27 @@ function goToForm(professional) {
       lastName,
       firstName,
       birthDay + "/" + birthMonth + "/" + birthYear,
-      './images/person-silhouette.png'
+      "./images/person-silhouette.png"
     );
 
     patientList.push(newPerson);
+    localStorage.setItem('patient_list',JSON.stringify(patientList));
 
-    const newAppointment = createNewAppointment(newPerson,selectedTime,professionalPlanning);
+    const newAppointment = createNewAppointment(
+      newPerson,
+      selectedTime,
+      professionalPlanning
+    );
+    if (newAppointment != undefined) {
+      appointmentList.push(newAppointment);
+      localStorage.setItem('appointment_list', JSON.stringify(appointmentList));
+      localStorage.setItem(
+        "professional_planning_list",
+        JSON.stringify(professionaPlanningList)
+      );
+      alert("Turno generado.");
+      renderMainGrid();
+    }
 
     console.log(newAppointment);
   });
