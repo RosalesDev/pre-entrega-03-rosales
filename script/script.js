@@ -230,6 +230,10 @@ const professionaPlanningList = [
   planning_4,
 ];
 
+
+let patientList = [];
+let appointmentList = [];
+
 if (!localStorage.getItem("professional_planning_list")) {
   localStorage.setItem(
     "professional_planning_list",
@@ -237,15 +241,19 @@ if (!localStorage.getItem("professional_planning_list")) {
   );
 }
 
-let patientList = [];
-let appointmentList = [];
+if (!localStorage.getItem("appointment_list")) {
+  localStorage.setItem(
+    "appointment_list",
+    JSON.stringify(appointmentList)
+  );
+}
 
 const mainTitle = document.querySelector("main h3");
 const mainGrid = document.querySelector(".container .row");
 
 function renderMainGrid() {
   mainGrid.innerHTML = "";
-  mainTitle.innerHTML = "Selecciona el prefesional para solicitar un turno.";
+  mainTitle.innerHTML = "Selecciona el profesional para solicitar un turno.";
 
   for (let professional of professionalList) {
     let cardDiv = document.createElement("div");
