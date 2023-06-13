@@ -1,46 +1,57 @@
 const accordion = document.querySelector('.accordion');
 const accordionContainer = document.querySelector('.container');
-let appointmentList = JSON.parse(localStorage.getItem('appointment_list'));
+const appointmentList = JSON.parse(localStorage.getItem('appointment_list'));
 
 if(appointmentList.length > 0) {
   
-//TODO:BUSCAR LA FORMA DE CREAR LA LISTA DE PROFESIONALES SIN QUE SE REPITAN.
-  let profesionalList = [];
+  let appointmentMap = new Map();
+  let professionalIdList = [];
+  let patientList = [];
+
 
   for(let appointment of appointmentList){
 
-    profesionalList.push(appointment.professional_planning.professional);
+    let professionalId = appointment.professional_planning.professional.id;
+
+    appointmentMap.set(professionalId,[]);
   }
-  profesionalList = [...new Set(profesionalList)];
 
-  console.log(profesionalList);
+  professionalIdList = [...appointmentMap.keys()];
+  
 
-  for(let professional of profesionalList) {
-    let index = profesionalList.indexOf(professional);
+  for(let professionalId of professionalIdList){
+      patientList = appointmentList.filter(appointment => 
+      appointment.professional_planning.professional.id == professionalId
+    );
+    appointmentMap.set(professionalId,patientList);
+  }
 
-    function buildTbody(currentProfessional){
+
+  for(let appointment of appointmentMap) {
+    let index = appointment[0];
+
+    function buildTbody(appointmentList){
       let tBody = '';
       let personIndex = 1;
       for(let appointment of appointmentList){
-        if(appointment.professional_planning.professional === currentProfessional){
+        let person = appointment.person;
           tBody += `
           <tr>
             <th scope="row">${personIndex}</th>
             <td>${appointment.time}</td>
-            <td>${appointment.person.doc_number}</td>
-            <td>${appointment.person.last_name}</td>
-            <td>${appointment.person.first_name}</td>
+            <td>${person.doc_number}</td>
+            <td>${person.last_name}</td>
+            <td>${person.first_name}</td>
           </tr>`
           personIndex++;
-        }
       }
       return tBody;
     }
 
 
-    let profesionalLastName = professional.person.last_name;
-    let profesionalFirstName = professional.person.first_name;
-    let profesionalSpecialty = professional.specialty;
+    let profesionalLastName = appointment[1][0].professional_planning.professional.person.last_name;
+    let profesionalFirstName = appointment[1][0].professional_planning.professional.person.first_name;
+    let profesionalSpecialty = appointment[1][0].professional_planning.professional.specialty;
 
     let accordionItem = document.createElement("div");
     accordionItem.className = 'accordion-item';
@@ -76,7 +87,7 @@ if(appointmentList.length > 0) {
               </tr>
             </thead>
             <tbody>
-              ${buildTbody(professional)}
+            ${buildTbody(appointment[1].reverse())}
             </tbody>
           </table>
         </div>
