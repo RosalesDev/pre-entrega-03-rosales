@@ -12,6 +12,7 @@ class Person {
     this.birthday = birthday;
     this.photo = photo;
   }
+  /* --------------- ESTE METODO LO USO PERO ES PARA LA PRÓXIMA --------------- */
   getAge() {
     let birthday_arr = this.birthday.split("/");
 
@@ -54,6 +55,9 @@ class ProfessionalPlanning {
     let totalMin = (this.date_to - this.date_from) / 60000;
     return Math.floor(totalMin / this.max_appointmaint_duration_in_min);
   }
+
+  /*GENERA UNA LISTA CON LOS HORARIOS DISPONIBLES SEGUN LAS HORAS
+  QUE SE ASIGNA AL CREAR LA PLANIFICACIÓN*/
   getPlanningDates() {
     const maxAppointmentAmount = this.getMaxAppointmentAmount();
     let datesArr = [];
@@ -99,17 +103,6 @@ class Appointment {
     this.time = time;
     this.professional_planning = professional_planning;
   }
-  showAppointmentData() {
-    console.log("=======DATOS DEL TURNO ASIGNADO=======");
-    console.log(`
-    DNI: ${this.person.doc_number}
-    Apellido: ${this.person.last_name}
-    Nombre: ${this.person.first_name}
-    Fecha de nacimiento: ${this.person.birthday}
-    Edad: ${this.person.getAge()}
-    Género: ${this.person.gender}
-    Hora del turno: ${this.time}`);
-  }
 }
 /* -------------------------------------------------------------------------- */
 /*                                 FIN CLASES                                 */
@@ -121,7 +114,9 @@ function createNewAppointment(person, time, professional_planning) {
   return appointment;
 }
 
-
+/* -------------------------------------------------------------------------- */
+/*                   DECLARACIÓN DE OBJETOS PARA PRUEBAS                      */
+/* -------------------------------------------------------------------------- */
 const professional_person_1 = new Person(
   "35887554",
   "M",
@@ -231,10 +226,15 @@ const professionaPlanningList = [
   planning_4,
 ];
 
+/* -------------------------------------------------------------------------- */
+/*                   FIN DECLARACIÓN DE OBJETOS PARA PRUEBAS                  */
+/* -------------------------------------------------------------------------- */
 
+/* ------------- DECLARO LISTAS PARA PACIENTES Y TURNOS CREADOS ------------- */
 let patientList = [];
 let appointmentList = [];
 
+/* -------- CREO LISTAS DE PLANIFICACIONES Y TURNOS EN LOCAL STORAGE -------- */
 if (!localStorage.getItem("professional_planning_list")) {
 
   localStorage.setItem(
@@ -254,6 +254,10 @@ if (!localStorage.getItem("appointment_list")) {
 const mainTitle = document.querySelector("main h3");
 const mainGrid = document.querySelector(".container .row");
 
+
+/* -------------------------------------------------------------------------- */
+/*                 FUNCIÓN QUE RENDERIZA LA PANTALLA PRINCIPAL                */
+/* -------------------------------------------------------------------------- */
 function renderMainGrid() {
   mainGrid.innerHTML = "";
   mainTitle.innerHTML = "Selecciona el profesional para solicitar un turno.";
@@ -287,27 +291,41 @@ function renderMainGrid() {
     });
   }
 }
+/* -------------------------------------------------------------------------- */
+/*             FIN FUNCIÓN QUE RENDERIZA LA PANTALLA PRINCIPAL                */
+/* -------------------------------------------------------------------------- */
 
 renderMainGrid();
 
+
+/* -------------------------------------------------------------------------- */
+/*           FUNCIÓN QUE REEMPLAZA EL CONTENIDO DE LA PAGINA PRINCIPAL        */
+/*             POR UN FORMULARIO PARA INGRESAR LOS DATOS DEL PACIENTE.        */
+/*           LA IDEA ERA SIMULAR UNA SPA PERO CREO QUE ME COMPLIQUE JEJE      */
+/* -------------------------------------------------------------------------- */
 function goToForm(professional) {
+
+  /* ----------- QUITA EL HORARIO QUE SE UTILIZÓ AL GENERAR EL TURNO ---------- */
   function deleteUsedTimeOnLS(professionalPlanning,selectedTime) {
     professionalPlanning.available_times_list = professionalPlanning.available_times_list.filter(
       (time) => time != selectedTime
     );
   }
+
+  /* ------------- TRAIGO DATOS DEL LS PARA USARLOS AL RENDERIZAR ------------- */
   const professionalPlanningListFromLS = JSON.parse(
     localStorage.getItem("professional_planning_list")
   );
   const professionalPlanningFromLS = professionalPlanningListFromLS.find(
     (professionalPlanning) =>
       professionalPlanning.professional.id == professional.id);
-  console.log(professionalPlanningFromLS);
 
+  /* ---------------- PLANIFICACIÓN DEL PROFESIONAL SELECIONADO --------------- */
   const professionalPlanning = professionaPlanningList.find(
     (planning) => planning.professional === professional
   );
 
+  /* ----------------- CONTROLO SI TIENE HORARIOS DISPONIBLES ----------------- */
   if (professionalPlanningFromLS.available_times_list.length == 0) {
     alert("El profesional no tiene horarios disponibles.");
     return 0;
@@ -315,6 +333,8 @@ function goToForm(professional) {
   if (localStorage.getItem("appointment_list")) {
     appointmentList = JSON.parse(localStorage.getItem("appointment_list"));
   }
+
+  /* ------------- LLENANDO EL SELECT PARA LA FECHA DE ENACIMIENTO ------------- */
   function fillDay() {
     let options = "";
 
@@ -351,14 +371,14 @@ function goToForm(professional) {
     return options;
   }
 
-  mainTitle.innerHTML = "Ingrese sus datos";
+  mainTitle.innerHTML = "";
 
   mainGrid.innerHTML = `
   <div class="container">
-  <div class="text-center p-4">
-    <p>Turno con: ${professional.person.last_name} ${
+  <div class="text-center pb-4">
+    <h3>Turno con: ${professional.person.last_name} ${
     professional.person.first_name
-  }</p>
+  }</h3>
   </div>
   <div class="row justify-content-center">
     <div class="form-container col-5 p-4">
@@ -438,6 +458,7 @@ function goToForm(professional) {
     renderMainGrid();
   });
 
+  /* -------------- COMPPORTAMIENTO DEL BOTON PARA CREAR EL TURNO ------------- */
   submitButton.addEventListener("click", (e) => {
     e.preventDefault();
     const selectedTime = document.getElementById("timeSelect").value;
@@ -480,6 +501,7 @@ function goToForm(professional) {
     patientList.push(newPerson);
     localStorage.setItem('patient_list',JSON.stringify(patientList));
 
+    /* ------------------------- SE CREA EL NUEVO TURNO ------------------------- */
     const newAppointment = createNewAppointment(
       newPerson,
       selectedTime,
@@ -489,15 +511,15 @@ function goToForm(professional) {
       appointmentList.push(newAppointment);
       localStorage.setItem('appointment_list', JSON.stringify(appointmentList));
 
+/* -- BORRO EL HORARIO USTILIZADO Y MADO DE NUEVO LAS PLANIFICACIONES AL LS - */
       deleteUsedTimeOnLS(professionalPlanningFromLS,selectedTime);
       localStorage.setItem(
         "professional_planning_list",
         JSON.stringify(professionalPlanningListFromLS)
       );
-      alert("Turno generado.");
       renderMainGrid();
+      alert("Turno generado.");
     }
 
-    console.log(newAppointment);
   });
 }

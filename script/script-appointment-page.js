@@ -8,7 +8,8 @@ if(appointmentList.length > 0) {
   let professionalIdList = [];
   let patientList = [];
 
-
+/* ------- CREO UN MAP CON LOS ID DE LOS PROFESIONALES Y UNA LISTA
+            PARA SUS PACIENTES                                    ------ */
   for(let appointment of appointmentList){
 
     let professionalId = appointment.professional_planning.professional.id;
@@ -18,7 +19,7 @@ if(appointmentList.length > 0) {
 
   professionalIdList = [...appointmentMap.keys()];
   
-
+/* --- OBTENGO LOS PACIENTES DE CADA PROFESIONAL Y SE LOS ASIGNO EN EL MAP -- */
   for(let professionalId of professionalIdList){
       patientList = appointmentList.filter(appointment => 
       appointment.professional_planning.professional.id == professionalId
@@ -26,7 +27,7 @@ if(appointmentList.length > 0) {
     appointmentMap.set(professionalId,patientList);
   }
 
-
+/* -------- SE GENERA LA TABLA CON LOS PROFESIONALES Y SUS PACIENTES -------- */
   for(let appointment of appointmentMap) {
     let index = appointment[0];
 
@@ -87,7 +88,7 @@ if(appointmentList.length > 0) {
               </tr>
             </thead>
             <tbody>
-            ${buildTbody(appointment[1].reverse())}
+            ${buildTbody(appointment[1])}
             </tbody>
           </table>
         </div>
