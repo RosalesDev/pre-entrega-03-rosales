@@ -121,6 +121,7 @@ function createNewAppointment(person, time, professional_planning) {
   return appointment;
 }
 
+
 const professional_person_1 = new Person(
   "35887554",
   "M",
@@ -184,7 +185,7 @@ const professional_4 = new Professional(
   "Nutrición"
 );
 
-let planning_1 = new ProfessionalPlanning(
+const planning_1 = new ProfessionalPlanning(
   1,
   professional_1,
   new Date(2023, 7, 22, 8, 0, 0),
@@ -192,7 +193,7 @@ let planning_1 = new ProfessionalPlanning(
   30
 );
 
-let planning_2 = new ProfessionalPlanning(
+const planning_2 = new ProfessionalPlanning(
   2,
   professional_2,
   new Date(2023, 7, 22, 15, 0, 0),
@@ -200,7 +201,7 @@ let planning_2 = new ProfessionalPlanning(
   60
 );
 
-let planning_3 = new ProfessionalPlanning(
+const planning_3 = new ProfessionalPlanning(
   3,
   professional_3,
   new Date(2023, 7, 22, 8, 0, 0),
@@ -208,7 +209,7 @@ let planning_3 = new ProfessionalPlanning(
   30
 );
 
-let planning_4 = new ProfessionalPlanning(
+const planning_4 = new ProfessionalPlanning(
   4,
   professional_4,
   new Date(2023, 7, 22, 19, 0, 0),
@@ -235,11 +236,13 @@ let patientList = [];
 let appointmentList = [];
 
 if (!localStorage.getItem("professional_planning_list")) {
+
   localStorage.setItem(
     "professional_planning_list",
     JSON.stringify(professionaPlanningList)
   );
 }
+
 
 if (!localStorage.getItem("appointment_list")) {
   localStorage.setItem(
@@ -288,6 +291,11 @@ function renderMainGrid() {
 renderMainGrid();
 
 function goToForm(professional) {
+  function deleteUsedTimeOnLS(professionalPlanning,selectedTime) {
+    professionalPlanning.available_times_list = professionalPlanning.available_times_list.filter(
+      (time) => time != selectedTime
+    );
+  }
   const professionalPlanningListFromLS = JSON.parse(
     localStorage.getItem("professional_planning_list")
   );
@@ -480,9 +488,11 @@ function goToForm(professional) {
     if (newAppointment != undefined) {
       appointmentList.push(newAppointment);
       localStorage.setItem('appointment_list', JSON.stringify(appointmentList));
+
+      deleteUsedTimeOnLS(professionalPlanningFromLS,selectedTime);
       localStorage.setItem(
         "professional_planning_list",
-        JSON.stringify(professionaPlanningList)
+        JSON.stringify(professionalPlanningListFromLS)
       );
       alert("Turno generado.");
       renderMainGrid();
